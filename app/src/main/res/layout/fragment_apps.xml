@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.fragments.AppsFragment">
+
+    <FrameLayout
+        android:id="@+id/all_container"
+        app:layout_anchorGravity="top"
+        android:layout_gravity="top"
+        app:layout_insetEdge="top"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:elevation="1dp"
+        android:background="@color/white"
+        android:layout_height="30dp">
+
+        <CheckBox
+            android:id="@+id/all_cb"
+            android:layout_gravity="end|center_vertical"
+            android:layout_width="wrap_content"
+            android:paddingEnd="8dp"
+            android:layout_height="30dp"
+            android:text="@string/all_select"
+            android:gravity="center"
+            android:button="@null"
+            android:drawablePadding="8dp"
+            app:buttonIconTint="@color/red"
+            android:drawableEnd="@drawable/cb_bg"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        tools:listitem="@layout/app_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottomAppBar"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        app:fabCradleMargin="10dp"
+        app:fabAlignmentMode="center"
+        app:fabAnimationMode="scale"
+        app:fabCradleRoundedCornerRadius="10dp"
+        app:fabCradleVerticalOffset="10dp"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/app_fab"
+        android:visibility="gone"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:rippleColor="@color/white"
+        android:clickable="true"
+        android:focusable="true"
+        style="@style/FabSize"
+        app:srcCompat="@drawable/bottom_fav_bg"
+        app:layout_anchor="@id/bottomAppBar"
+        app:tint="@null"
+        android:contentDescription="@string/send" />
+
+    <TextView
+        android:id="@+id/counter"
+        android:layout_width="60dp"
+        android:layout_height="15dp"
+        app:layout_anchor="@id/app_fab"
+        android:layout_gravity="top|end"
+        android:gravity="end"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
