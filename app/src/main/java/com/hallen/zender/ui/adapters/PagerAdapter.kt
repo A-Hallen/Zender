@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.hallen.zender.ui.fragments.AppsFragment
+import com.hallen.zender.ui.fragments.*
 
 class PagerAdapter(
     fragmentManager: FragmentManager,
@@ -15,8 +15,11 @@ class PagerAdapter(
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> AppsFragment()
-            else -> AppsFragment()
+            0 -> ArchivosFragment()
+            1 -> AppsFragment()
+            2 -> AlbumFragment()
+            3 -> VideoFragment()
+            else -> AudioFragment()
         }
     }
 

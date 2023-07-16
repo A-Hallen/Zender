@@ -20,6 +20,12 @@
         <item name="color">@color/white</item>
     </style>
 
+    <style name="RoundCorner1" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">5dp</item>
+        <item name="color">@color/white</item>
+    </style>
+
     <style name="Circular" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
@@ -31,4 +37,5 @@
         <item name="maxImageSize">50dp</item>
         <item name="fabCustomSize">50dp</item>
     </style>
+    
 </resources>

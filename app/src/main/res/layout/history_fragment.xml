@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:name="com.hallen.zender.ui.fragments.HistoryFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layoutManager="LinearLayoutManager"
+    tools:context=".ui.fragments.HistoryFragment">
+
+    <FrameLayout
+        android:id="@+id/all_container"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/white"
+        android:elevation="1dp">
+
+        <CheckBox
+            android:id="@+id/all_cb"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center_vertical"
+            android:button="@null"
+            android:drawableEnd="@drawable/cb_bg"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:paddingEnd="8dp"
+            android:text="@string/all_select"
+            app:buttonIconTint="@color/red"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </FrameLayout>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:name="com.hallen.zender.ui.fragments.HistoryFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="LinearLayoutManager"
+        tools:context=".ui.fragments.HistoryFragment"
+        tools:itemCount="10"
+        tools:listitem="@layout/history_item" />
+</LinearLayout>

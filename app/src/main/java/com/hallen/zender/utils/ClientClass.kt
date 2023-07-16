@@ -6,8 +6,8 @@ import java.net.InetSocketAddress
 import java.net.Socket
 
 class ClientClass(hostAddress: InetAddress, private val callback: (Socket) -> Unit) : Thread() {
-    val socket: Socket = Socket()
-    val hostAdd: String? = hostAddress.hostAddress
+    private val socket: Socket = Socket()
+    private val hostAdd: String? = hostAddress.hostAddress
 
     override fun run() {
         try {

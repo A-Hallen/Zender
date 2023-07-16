@@ -3,6 +3,19 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="delete">Delete</string>
+    <string name="close">Close</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="back">Atrás</string>
     <string name="send">Enviar</string>
+    <string name="music_icon">Album artist</string>
+    <string name="delete_sure">¿Estás seguro de que deseas eliminar: </string>
+    <string name="delete_sure_plural">¿Estás seguro de que deseas eliminar estos archivos? </string>
     <string name="all_select">Seleccionar todos</string>
+    <string name="content_description_delete">Eliminar este archivo</string>
+    <string name="content_description_close">Cancelar la selección</string>
+    <string name="create">Crear</string>
+    <string name="join">Buscar</string>
+    <string name="device_not_find">No se encontró ningún dispositivo</string>
+    <string name="history">Historial\n</string>
 </resources>

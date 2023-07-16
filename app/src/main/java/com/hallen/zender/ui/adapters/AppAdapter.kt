@@ -22,6 +22,11 @@ class AppAdapter :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {
         val binding = AppItemBinding.inflate(LayoutInflater.from(parent.context))
+        val lp = RecyclerView.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        binding.root.layoutParams = lp
         return AppViewHolder(binding)
     }
 
@@ -67,15 +72,19 @@ class AppAdapter :
             Glide.with(binding.root.context).load(appIconUri)
                 .error(android.R.drawable.sym_def_app_icon)
                 .into(binding.icon)
-            binding.checkbox.isChecked = app.packageName in checks
-            binding.text1.text = packageManager.getApplicationLabel(app)
-            binding.text2.text = formatBytes(File(app.publicSourceDir).length())
-            binding.parent.setOnClickListener {
-                binding.checkbox.isChecked = !binding.checkbox.isChecked
-                if (binding.checkbox.isChecked) {
-                    checks.add(app.packageName)
-                } else checks.remove(app.packageName)
-                checkeds.value = checks
+            with(binding) {
+                if (app.packageName in checks) {
+                    if (!checkbox.isChecked) checkbox.toggle()
+                } else if (checkbox.isChecked) checkbox.toggle()
+                text1.text = packageManager.getApplicationLabel(app)
+                text2.text = formatBytes(File(app.publicSourceDir).length())
+                parent.setOnClickListener {
+                    checkbox.toggle()
+                    if (checkbox.isChecked) {
+                        checks.add(app.packageName)
+                    } else checks.remove(app.packageName)
+                    checkeds.value = checks
+                }
             }
         }
     }

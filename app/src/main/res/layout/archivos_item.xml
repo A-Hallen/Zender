@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:background="@drawable/black_ripple"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center"
+    android:layout_height="70dp">
+
+    <View
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginHorizontal="10dp"
+        android:background="@color/softgray"
+        android:layout_width="match_parent"
+        android:layout_height="0.51dp" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/icon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="10dp"
+        android:layout_gravity="center"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:adjustViewBounds="true"
+        android:clickable="false"
+        android:duplicateParentState="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_folder"
+        app:shapeAppearanceOverlay="@style/RoundCorner"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="@+id/checkbox"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center"
+        app:layout_constraintStart_toEndOf="@id/icon"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_marginHorizontal="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            tools:text="AlmacenamientoAlmacenamientoAlmacenamientoAlmacenamientoAlmacenamientoAlmacenamiento"
+            app:layout_constraintStart_toEndOf="@+id/icon" />
+
+        <TextView
+            android:id="@+id/size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginHorizontal="10dp"
+            tools:text="37.86GB /58.18Gb"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toStartOf="@+id/checkbox"
+            app:layout_constraintStart_toEndOf="@+id/icon"
+            app:layout_constraintTop_toBottomOf="@+id/view" />
+    </LinearLayout>
+
+
+    <androidx.appcompat.widget.AppCompatCheckedTextView
+        android:id="@+id/checkbox"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_width="15dp"
+        android:layout_marginEnd="20dp"
+        android:layout_height="70dp"
+        android:layout_gravity="center"
+        android:checkMark="@drawable/cb_bg"
+        android:gravity="center"
+        app:buttonIconTint="@color/red"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

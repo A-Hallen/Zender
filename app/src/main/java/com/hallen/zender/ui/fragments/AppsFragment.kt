@@ -6,9 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hallen.zender.MainActivity
+import com.hallen.zender.R
 import com.hallen.zender.databinding.FragmentAppsBinding
 import com.hallen.zender.ui.adapters.AppAdapter
 import com.hallen.zender.viewmodel.AppViewModel
@@ -18,7 +19,7 @@ import java.io.File
 @AndroidEntryPoint
 class AppsFragment : Fragment() {
     private lateinit var binding: FragmentAppsBinding
-    private val appsViewModels: AppViewModel by viewModels()
+    private val appsViewModels: AppViewModel by activityViewModels()
     private lateinit var appAdapter: AppAdapter
 
     override fun onCreateView(
@@ -38,26 +39,24 @@ class AppsFragment : Fragment() {
         appAdapter.checkeds.observe(viewLifecycleOwner) {
             if (it.isEmpty()) {
                 with(binding) {
-                    appFab.hide()
-                    bottomAppBar.performHide()
                     allContainer.visibility = View.GONE
+                    appFab.setImageResource(R.drawable.bottom_fav_bg_search)
                     // Establecer el valor del atributo como margen inferior para el BottomAppBar
                     recyclerview.layoutParams =
-                        layoutParams.apply { bottomMargin = 0; topMargin = 0 }
+                        layoutParams.apply { topMargin = 0 }
+                    counter.visibility = View.GONE
                     counter.text = ""
                 }
             } else {
                 // Obtener el valor del atributo actionBarSize en píxeles
-                val actionBarSize =
-                    resources.getDimensionPixelSize(com.google.android.material.R.dimen.abc_action_bar_default_height_material)
                 with(binding) {
-                    appFab.show()
-                    bottomAppBar.visibility = View.VISIBLE
-                    bottomAppBar.performShow()
+                    appFab.setImageResource(R.drawable.bottom_fav_bg)
                     allContainer.visibility = View.VISIBLE
                     recyclerview.layoutParams = layoutParams.apply {
-                        bottomMargin = actionBarSize; topMargin = binding.allCb.height
-                    }; counter.text = it.size.toString()
+                        topMargin = binding.allContainer.height
+                    }
+                    counter.visibility = View.VISIBLE
+                    counter.text = it.size.toString()
                 }
             }
         }
@@ -65,10 +64,10 @@ class AppsFragment : Fragment() {
         binding.recyclerview.layoutManager = GridLayoutManager(requireContext(), 4)
         binding.recyclerview.adapter = appAdapter
         appsViewModels.appModel.observe(viewLifecycleOwner) {
+            binding.fastScroll.size = it.size
             appAdapter.apps.addAll(it)
             appAdapter.notifyDataSetChanged()
         }
-        appsViewModels.getApps(requireContext())
 
         binding.allCb.setOnCheckedChangeListener { _, b ->
             appAdapter.checkAll(b)
@@ -78,8 +77,17 @@ class AppsFragment : Fragment() {
                 ?.mapNotNull { it.takeIf { appAdapter.checks.contains(it.packageName) } }
                 ?.map { File(it.sourceDir) } ?: emptyList()
 
-            (requireActivity() as MainActivity).sendFile(files)
+            val mainActivity = (requireActivity() as MainActivity)
+            val wifiClass = mainActivity.wifiClass
+            if (files.isEmpty()) {
+                wifiClass.discoverDevices(false)
+            } else {
+                mainActivity.files.addAll(files)
+                wifiClass.discoverDevices()
+            }
         }
+        binding.fastScroll.setUpRecyclerView(binding.recyclerview)
     }
+
 
 }

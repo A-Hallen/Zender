@@ -13,7 +13,6 @@ import com.hallen.zender.databinding.DialogDeviceItemBinding
 class DeviceAdapter(
     var items: ArrayList<WifiP2pDevice> = arrayListOf()
 ) : BaseAdapter() {
-    var dismissed: Boolean = true
     override fun getCount(): Int = items.size
     override fun getItem(position: Int): Any = items[position]
     override fun getItemId(position: Int): Long = position.toLong()
@@ -29,21 +28,8 @@ class DeviceAdapter(
         return binding.root
     }
 
-    private lateinit var failedCallback: () -> Unit
-    fun runFailed() {
-        failedCallback()
-    }
-
-    fun failed(function: () -> Unit) {
-        failedCallback = function
-    }
-
-    private lateinit var successCallback: () -> Unit
-    fun runSuccess() {
-        successCallback()
-    }
-
-    fun success(function: () -> Unit) {
-        successCallback = function
+    fun newItems(it: MutableCollection<WifiP2pDevice>) {
+        items.clear(); items.addAll(it)
+        notifyDataSetChanged()
     }
 }
