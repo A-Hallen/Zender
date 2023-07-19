@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -9,7 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="54dp"
+        android:layout_height="55dp"
         android:background="@color/white"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -46,16 +47,19 @@
             app:layout_constraintStart_toEndOf="@+id/icon"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/history"
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/history_animation"
             android:layout_width="45dp"
             android:layout_height="45dp"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/circular_ripple"
-            android:contentDescription="@string/history"
-            android:src="@drawable/download_icon"
+            android:padding="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:lottie_colorFilter="@color/colorPrimary"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/history_animation" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -64,13 +68,13 @@
         android:id="@+id/progress_bar"
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="5dp"
+        android:layout_height="15dp"
         android:layout_marginHorizontal="5dp"
         android:gravity="center"
-        android:progress="75"
         android:progressDrawable="@drawable/progress_bg"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        tools:progress="75"
         tools:visibility="visible" />
 
     <com.google.android.material.tabs.TabLayout

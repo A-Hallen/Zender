@@ -36,8 +36,50 @@ class AlbumFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         imagesAdapter = ImageAdapter()
+        setObservers()
+        setupRecyclerview()
+        setupListeners()
+        binding.fastScroll.setUpRecyclerView(binding.recyclerview)
+    }
+
+    private fun sendImages() {
+        val selectedImages = appsViewModels.albumesLiveData.value?.filter {
+            it.imagePath in imagesAdapter.checks
+        }
+        val selectedFiles = selectedImages?.map { File(it.imagePath) } ?: listOf()
+        val mainActivity = (requireActivity() as MainActivity)
+        if (selectedFiles.isNotEmpty()) {
+            mainActivity.files.addAll(selectedFiles)
+        }
+        mainActivity.wifiClass.discoverDevices(false)
+    }
+
+    private fun setupListeners() {
+        binding.appFab.setOnClickListener {
+            sendImages()
+        }
+        binding.close.setOnClickListener {
+            imagesAdapter.checkAll(false)
+        }
+        binding.delete.setOnClickListener {
+            if (imagesAdapter.checks.isNotEmpty()) deleteFile()
+        }
+    }
+
+    private fun setupRecyclerview() {
+        val gridLayoutManager = GridLayoutManager(requireContext(), 3)
+        gridLayoutManager.spanSizeLookup = object : SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                val header = imagesAdapter.images[position].header
+                return if (header) 3 else 1
+            }
+        }
+        binding.recyclerview.layoutManager = gridLayoutManager
+        binding.recyclerview.adapter = imagesAdapter
+    }
+
+    private fun setObservers() {
         imagesAdapter.checkeds.observe(viewLifecycleOwner) {
             with(binding) {
                 if (it.isEmpty()) {
@@ -50,58 +92,19 @@ class AlbumFragment : Fragment() {
                     counter.visibility = View.VISIBLE
                     counter.text = it.size.toString()
                 }
-                bottomNavigationView.isVisible = imagesAdapter.checkedMode
+                bottomView.isVisible = imagesAdapter.checkedMode
             }
         }
-
-        val gridLayoutManager = GridLayoutManager(requireContext(), 3)
-        gridLayoutManager.spanSizeLookup = object : SpanSizeLookup() {
-            override fun getSpanSize(position: Int): Int {
-                return if (imagesAdapter.images[position].header) {
-                    3
-                } else 1
-            }
-
-        }
-        binding.recyclerview.layoutManager = gridLayoutManager
-        binding.recyclerview.adapter = imagesAdapter
-        binding.recyclerview
         appsViewModels.albumesLiveData.observe(viewLifecycleOwner) {
             binding.fastScroll.size = it.size
             val orderImages: ArrayList<Image> =
                 ArrayList(it.sortedByDescending { image -> image.date * 1000L })
             imagesAdapter.updateImages(orderImages)
         }
-        binding.appFab.setOnClickListener {
-            val images = appsViewModels.albumesLiveData.value
-                ?.mapNotNull { it.takeIf { imagesAdapter.checks.contains(it.imagePath) } }
-                ?.map { File(it.imagePath) } ?: emptyList()
-
-            val mainActivity = (requireActivity() as MainActivity)
-            val wifiClass = mainActivity.wifiClass
-            if (images.isEmpty()) {
-                wifiClass.discoverDevices(false)
-            } else {
-                mainActivity.files.addAll(images)
-                wifiClass.discoverDevices()
-            }
-        }
-        binding.bottomNavigationView.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.close -> {
-                    imagesAdapter.checkAll(false)
-                }
-
-                R.id.delete -> {
-                    if (imagesAdapter.checks.isNotEmpty()) deleteFile()
-                }
-            }
-            return@setOnItemSelectedListener true
-        }
-        binding.fastScroll.setUpRecyclerView(binding.recyclerview)
     }
 
     private fun deleteFile() {
+        // Search selected files and his uri and deleted
         val checks: List<Pair<String, Uri?>> = imagesAdapter.checks.map { path ->
             Pair(
                 path,
@@ -111,8 +114,7 @@ class AlbumFragment : Fragment() {
             )
         }
         actionDelete.deleteFile(checks) {
-            imagesAdapter.checks.clear()
-            imagesAdapter.checkeds.value = arrayListOf()
+            imagesAdapter.checkAll(false)
             appsViewModels.getAllImages(requireContext())
         }
     }

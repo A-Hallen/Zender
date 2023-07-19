@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hallen.zender.MainActivity
+import com.hallen.zender.R
 import com.hallen.zender.databinding.FragmentArchivosBinding
 import com.hallen.zender.model.interfaces.OnItemClickListener
 import com.hallen.zender.ui.adapters.ArchivosAdapter
@@ -21,7 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 
 @AndroidEntryPoint
-class ArchivosFragment : Fragment(), OnItemClickListener, View.OnClickListener {
+class ArchivosFragment : Fragment(), OnItemClickListener {
     private lateinit var binding: FragmentArchivosBinding
     private val appsViewModels: AppViewModel by activityViewModels()
     private val storageAdapter by lazy { StorageAdapter() }
@@ -44,26 +47,32 @@ class ArchivosFragment : Fragment(), OnItemClickListener, View.OnClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupRecyclerViews()
+        setupObservers()
+        setupListeners()
+    }
 
-        binding.storageRecyclerview.layoutManager = GridLayoutManager(requireContext(), 2)
-        binding.recyclerview.layoutManager = LinearLayoutManager(requireContext())
-        storageAdapter.setItemClickListener(storageClickListener)
-        binding.storageRecyclerview.adapter = storageAdapter
-        fileAdapter = ArchivosAdapter(requireContext()) {
-            with(binding) {
-                if (it) {
-                    close.visibility = View.VISIBLE
-                    delete.visibility = View.VISIBLE
-                    back.visibility = View.GONE
-                } else {
-                    close.visibility = View.INVISIBLE
-                    delete.visibility = View.INVISIBLE
-                    back.visibility = View.VISIBLE
-                }
+    private fun setupRecyclerViews() {
+        with(binding) {
+            storageRecyclerview.layoutManager = GridLayoutManager(requireContext(), 2)
+            recyclerview.layoutManager = LinearLayoutManager(requireContext())
+            storageAdapter.setItemClickListener(storageClickListener)
+            storageRecyclerview.adapter = storageAdapter
+
+            fileAdapter = ArchivosAdapter(requireContext()) {
+                close.isInvisible = !it
+                delete.isInvisible = !it
+                allCb.isVisible = it
+                if (allCb.isChecked && !it) allCb.toggle()
+                back.isInvisible = it
+                actualPath.isVisible = !it
             }
         }
         fileAdapter.setItemClickListener(this)
         binding.recyclerview.adapter = fileAdapter
+    }
+
+    private fun setupObservers() {
         appsViewModels.storageLiveData.observe(viewLifecycleOwner) {
             storageAdapter.update(it)
         }
@@ -73,79 +82,73 @@ class ArchivosFragment : Fragment(), OnItemClickListener, View.OnClickListener {
         appsViewModels.actualPath.observe(viewLifecycleOwner) {
             binding.actualPath.text = it
         }
-        val views = arrayOf(binding.back, binding.close, binding.delete, binding.appFab)
-        views.forEach { it.setOnClickListener(this) }
-
-        binding.appFab.setOnClickListener {
-            val files = fileAdapter.items
-                .mapNotNull { it.takeIf { fileAdapter.checks.value!!.contains(it.absolutePath) } }
-            val mainActivity = (requireActivity() as MainActivity)
-            val wifiClass = mainActivity.wifiClass
-            if (files.isEmpty()) {
-                wifiClass.discoverDevices(false)
+        fileAdapter.checks.observe(viewLifecycleOwner) {
+            if (it.isEmpty()) {
+                binding.appFab.setImageResource(R.drawable.bottom_fav_bg_search)
+                binding.counter.text = ""
+                binding.counter.visibility = View.GONE
             } else {
-                mainActivity.files.addAll(files)
-                wifiClass.discoverDevices()
+                binding.appFab.setImageResource(R.drawable.bottom_fav_bg)
+                binding.counter.visibility = View.VISIBLE
+                binding.counter.text = it.size.toString()
             }
         }
+    }
+
+    private fun setupListeners() {
+        with(binding) {
+            back.setOnClickListener { appsViewModels.back() }
+            delete.setOnClickListener { deleteFile() }
+            close.setOnClickListener {
+                fileAdapter.checkAll(false)
+                delete.visibility = View.INVISIBLE
+                close.visibility = View.INVISIBLE
+                back.visibility = View.VISIBLE
+            }
+            appFab.setOnClickListener {
+                val selectedFiles = fileAdapter.items.filter {
+                    it.absolutePath in fileAdapter.checks.value!! && !it.isDirectory
+                }
+                val mainActivity = (requireActivity() as MainActivity)
+                if (selectedFiles.isNotEmpty()) {
+                    mainActivity.files.addAll(selectedFiles)
+                }
+                mainActivity.wifiClass.discoverDevices(false)
+            }
+            allCb.setOnCheckedChangeListener { _, b ->
+                fileAdapter.checkAll(b)
+            }
+        }
+    }
+
+    private fun showVideo(file: File, mime: String) {
+        val uri = appsViewModels.videosLiveData.value?.find {
+            it.path == file.absolutePath
+        }?.mediaUri
+        if (uri != null) {
+            actionView.showVideo(uri, requireContext())
+        } else actionView.showItem(file, requireContext(), mime)
     }
 
     override fun onItemClick(position: Int) {
         val file = fileAdapter.items[position]
         if (file.isDirectory && file.canRead()) {
             appsViewModels.loadFiles(file.absolutePath)
-        } else {
-            val mime: String = GetMimeFile(requireContext()).getmime(file)
-            when (mime.split("/")[0]) {
-                "image" -> {
-                    val uri = appsViewModels.albumesLiveData.value?.find {
-                        it.imagePath == file.absolutePath
-                    }?.mediaUri
-                    if (uri != null) {
-                        actionView.showImage(uri, requireContext())
-                    } else actionView.showItem(file, requireContext(), mime)
-                }
-
-                "video" -> {
-                    val uri = appsViewModels.videosLiveData.value?.find {
-                        it.path == file.absolutePath
-                    }?.mediaUri
-                    if (uri != null) {
-                        actionView.showVideo(uri, requireContext())
-                    } else actionView.showItem(file, requireContext(), mime)
-                }
-
-                else -> {
-                    actionView.showItem(file, requireContext(), mime)
-                }
-            }
+            return
         }
-    }
-
-    override fun onClick(view: View?) {
-        with(binding) {
-            when (view?.id) {
-                back.id -> appsViewModels.back()
-                close.id -> {
-                    fileAdapter.sellectAll(false)
-                    delete.visibility = View.INVISIBLE
-                    close.visibility = View.INVISIBLE
-                    back.visibility = View.VISIBLE
-                }
-
-                delete.id -> {
-                    deleteFile()
-                }
-            }
+        val mime: String = GetMimeFile(requireContext()).getmime(file)
+        when (mime.split("/")[0]) {
+            "image" -> actionView.showImage(file, requireContext())
+            "video" -> showVideo(file, mime)
+            else -> actionView.showItem(file, requireContext(), mime)
         }
     }
 
     private fun deleteFile() {
         val files = fileAdapter.checks.value?.map { File(it) } ?: return
         actionDelete.deleteFiles(files) {
-            fileAdapter.checks.value?.clear()
-            appsViewModels.actualPath
             appsViewModels.reloadFiles()
+            fileAdapter.checkAll(false)
         }
     }
 }

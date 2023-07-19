@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import javax.inject.Inject
 
 class AppsUseCase @Inject constructor() {
-    fun getAllApps(context: Context): List<ApplicationInfo> {
+    suspend fun getAllApps(context: Context): List<ApplicationInfo> {
         val nonSystemApps = mutableListOf<ApplicationInfo>()
         val packageManager = context.packageManager
         val applications = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)

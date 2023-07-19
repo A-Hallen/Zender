@@ -5,16 +5,45 @@
     android:name="com.hallen.zender.ui.fragments.HistoryFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical"
     app:layoutManager="LinearLayoutManager"
     tools:context=".ui.fragments.HistoryFragment">
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/all_container"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="55dp"
+        android:layout_gravity="top"
         android:background="@color/white"
-        android:elevation="1dp">
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/back"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="10dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/circular_ripple"
+            android:clickable="false"
+            android:duplicateParentState="true"
+            android:padding="5dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_back"
+            app:shapeAppearanceOverlay="@style/Circular" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:text="@string/historial"
+            android:textColor="@color/darkgray"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <CheckBox
             android:id="@+id/all_cb"
@@ -24,22 +53,82 @@
             android:button="@null"
             android:drawableEnd="@drawable/cb_bg"
             android:drawablePadding="8dp"
-            android:gravity="center"
-            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="18dp"
             android:text="@string/all_select"
+            android:visibility="gone"
             app:buttonIconTint="@color/red"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-    </FrameLayout>
+    </LinearLayout>
 
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:name="com.hallen.zender.ui.fragments.HistoryFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/softgray3"
+        android:clipToPadding="false"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.fragments.HistoryFragment"
         tools:itemCount="10"
         tools:listitem="@layout/history_item" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="1dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:gravity="center"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/delete"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:background="@drawable/circular_ripple"
+            android:contentDescription="@string/delete"
+            android:gravity="center"
+            android:padding="12dp"
+            android:src="@drawable/ic_delete"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/details"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/details"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:background="@drawable/circular_ripple"
+            android:contentDescription="@string/cancel"
+            android:gravity="center"
+            android:padding="12dp"
+            android:src="@drawable/ic_details"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/cancel"
+            app:layout_constraintStart_toEndOf="@+id/delete"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/cancel"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:background="@drawable/circular_ripple"
+            android:contentDescription="@string/detalles"
+            android:gravity="center"
+            android:padding="12dp"
+            android:src="@drawable/ic_close"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/details"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </LinearLayout>

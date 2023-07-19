@@ -17,11 +17,15 @@ import com.hallen.zender.utils.ActionView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AudioAdapter :
+class AudioAdapter(private val checkModeCallback: (Boolean) -> Unit) :
     RecyclerView.Adapter<AudioAdapter.AudioViewHolder>() {
     private val formatter = SimpleDateFormat("mm:ss", Locale.ROOT)
 
     var checkedMode = false
+        set(value) {
+            field = value
+            checkModeCallback(value)
+        }
     var audios: ArrayList<Audio> = arrayListOf()
     val checkeds: MutableLiveData<ArrayList<String>> =
         MutableLiveData<ArrayList<String>>().apply { value = arrayListOf() }

@@ -1,75 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/softgray3"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragments.AppsFragment">
 
     <!-- ?attr/actionBarSize tools:layoutManager="GridLayoutManager" -->
 
     <LinearLayout
-        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/storage_recyclerview"
-            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:background="@color/softgray3"
             android:clipToPadding="false"
-            tools:layoutManager="GridLayoutManager"
+            android:gravity="center"
+            android:numColumns="auto_fit"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
-            tools:spanCount="2"
-            tools:listitem="@layout/storage_item"
             tools:itemCount="2"
-            android:layout_gravity="center_horizontal"
-            android:numColumns="auto_fit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            tools:layoutManager="GridLayoutManager"
+            tools:listitem="@layout/storage_item"
+            tools:spanCount="2" />
 
         <LinearLayout
-            android:orientation="horizontal"
             android:id="@+id/all_container"
             android:layout_width="match_parent"
+            android:layout_height="30dp"
             android:background="@color/white"
+            android:gravity="end"
+            android:orientation="horizontal"
             android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:layout_height="30dp">
+            android:paddingEnd="10dp">
 
             <TextView
                 android:id="@+id/actual_path"
-                android:textSize="14sp"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="@color/darkgray1"
-                android:gravity="center_vertical"
-                android:background="@drawable/select_all_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_margin="3dp"
+                android:background="@drawable/select_all_bg"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
-                tools:text="storage/emulated/0/Android/hallen/zender/zomething/to/search/now"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent" />
+                android:textColor="@color/darkgray1"
+                android:textSize="14sp"
+                tools:text="storage/emulated/0/Android/hallen/zender/zomething/to/search/now" />
 
             <CheckBox
                 android:id="@+id/all_cb"
-                android:visibility="gone"
-                android:layout_gravity="end|center_vertical"
                 android:layout_width="wrap_content"
-                android:paddingEnd="8dp"
                 android:layout_height="match_parent"
-                android:text="@string/all_select"
-                android:gravity="center"
+                android:layout_gravity="end|center_vertical"
                 android:button="@null"
-                android:drawablePadding="8dp"
-                app:buttonIconTint="@color/red"
                 android:drawableEnd="@drawable/cb_bg"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:paddingStart="0dp"
+                android:paddingEnd="8dp"
+                android:text="@string/all_select"
+                app:buttonIconTint="@color/red"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerview"
@@ -77,116 +79,121 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
             android:background="@color/white"
-            tools:itemCount="2"
             android:clipToPadding="false"
             android:gravity="center"
             android:paddingBottom="?attr/actionBarSize"
+            tools:itemCount="2"
             tools:listitem="@layout/archivos_item" />
     </LinearLayout>
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:fabCradleMargin="10dp"
-        app:fabAlignmentMode="center"
         android:background="@color/white"
-        app:fabAnimationMode="scale"
-        app:fabCradleRoundedCornerRadius="10dp"
-        app:fabCradleVerticalOffset="10dp"
-        app:contentInsetStart="0dp"
         android:clickable="false"
         android:focusable="false"
-        android:layout_height="wrap_content">
+        app:contentInsetStart="0dp"
+        app:fabAlignmentMode="center"
+        app:fabAnimationMode="scale"
+        app:fabCradleMargin="10dp"
+        app:fabCradleRoundedCornerRadius="10dp"
+        app:fabCradleVerticalOffset="10dp" />
 
-        <!--        <com.google.android.material.bottomnavigation.BottomNavigationView-->
-        <!--            android:id="@+id/bottomNavigationView"-->
-        <!--            tools:visibility="visible"-->
-        <!--            app:itemIconTint="@color/colorPrimaryVariant"-->
-        <!--            android:background="@color/transparent"-->
-        <!--            app:elevation="@null"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            app:labelVisibilityMode="unlabeled"-->
-        <!--            app:menu="@menu/file_bottom_menu" />-->
-    </com.google.android.material.bottomappbar.BottomAppBar>
-
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottomView"
-        android:layout_gravity="bottom"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize">
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="bottom">
 
         <ImageView
             android:id="@+id/back"
-            android:visibility="visible"
-            android:contentDescription="@string/back"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="20dp"
-            android:src="@drawable/ic_back"
-            android:gravity="center"
-            android:layout_width="40dp"
-            android:padding="5dp"
-            android:clickable="true"
-            android:focusable="true"
             android:background="@drawable/circular_ripple"
-            android:layout_height="40dp" />
+            android:clickable="true"
+            android:contentDescription="@string/back"
+            android:focusable="true"
+            android:gravity="center"
+            android:padding="15dp"
+            android:src="@drawable/ic_back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/view"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/delete"
-            android:visibility="invisible"
-            android:contentDescription="@string/delete"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="20dp"
-            android:src="@drawable/ic_delete"
-            android:gravity="center"
-            android:layout_width="40dp"
-            android:padding="5dp"
             android:background="@drawable/circular_ripple"
-            android:layout_height="40dp" />
+            android:contentDescription="@string/delete"
+            android:gravity="center"
+            android:padding="15dp"
+            android:src="@drawable/ic_delete"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/view"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/close"
+            app:layout_constraintStart_toEndOf="@+id/back"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/close"
-            android:visibility="invisible"
-            android:contentDescription="@string/close"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_gravity="center_vertical|end"
-            android:layout_marginEnd="20dp"
-            android:src="@drawable/ic_close"
-            android:gravity="center"
-            android:layout_width="40dp"
-            android:padding="5dp"
             android:background="@drawable/circular_ripple"
-            android:layout_height="40dp" />
-    </FrameLayout>
+            android:contentDescription="@string/close"
+            android:gravity="center"
+            android:padding="15dp"
+            android:src="@drawable/ic_close"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/view"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/app_fab"
+        style="@style/FabSize"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:rippleColor="@color/white"
         android:clickable="true"
+        android:contentDescription="@string/send"
         android:focusable="true"
-        style="@style/FabSize"
-        app:srcCompat="@drawable/bottom_fav_bg_search"
         app:layout_anchor="@id/bottomAppBar"
-        app:tint="@null"
-        android:contentDescription="@string/send" />
+        app:rippleColor="@color/white"
+        app:srcCompat="@drawable/bottom_fav_bg_search"
+        app:tint="@null" />
 
     <TextView
         android:id="@+id/counter"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="22dp"
-        android:minWidth="23dp"
-        android:elevation="3dp"
-        app:layout_anchor="@id/app_fab"
-        android:background="@drawable/counter_bg"
         android:layout_gravity="top|end"
+        android:background="@drawable/counter_bg"
+        android:elevation="3dp"
         android:gravity="center"
+        android:minWidth="23dp"
         android:padding="3dp"
+        android:textColor="@color/black"
         android:textSize="12sp"
         android:textStyle="bold"
-        tools:text="133"
-        android:textColor="@color/black" />
+        android:visibility="gone"
+        app:layout_anchor="@id/app_fab"
+        tools:text="133" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

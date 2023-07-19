@@ -1,12 +1,15 @@
 package com.hallen.zender.utils
 
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.webkit.MimeTypeMap
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.hallen.zender.R
 import java.io.File
-import java.util.*
+import java.util.Locale
 
 class GetMimeFile(private val context: Context) {
     private var extension: String = ""
@@ -17,6 +20,17 @@ class GetMimeFile(private val context: Context) {
         val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         this.mime = mime ?: ""
         return mime ?: ""
+    }
+
+    fun getApkIcon(file: File): Drawable {
+        val path = file.absolutePath
+        val pm: PackageManager = context.packageManager
+        val pi: PackageInfo = pm.getPackageArchiveInfo(path, 0)
+            ?: return AppCompatResources.getDrawable(context, android.R.drawable.sym_def_app_icon)!!
+        //the secrets lines of code
+        pi.applicationInfo.sourceDir = path
+        pi.applicationInfo.publicSourceDir = path
+        return pi.applicationInfo.loadIcon(pm)
     }
 
     fun getImageFromExtension(): Drawable {

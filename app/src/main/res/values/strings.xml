@@ -18,4 +18,7 @@
     <string name="join">Buscar</string>
     <string name="device_not_find">No se encontró ningún dispositivo</string>
     <string name="history">Historial\n</string>
+    <string name="historial">Historial</string>
+    <string name="detalles">Detalles</string>
+    <string name="propiedades">Propiedades</string>
 </resources>

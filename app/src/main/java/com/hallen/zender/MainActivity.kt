@@ -14,10 +14,14 @@ import android.provider.Settings
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.tabs.TabLayoutMediator
 import com.hallen.zender.databinding.ActivityMainBinding
+import com.hallen.zender.model.History
+import com.hallen.zender.model.History.Companion.COMPLETED
 import com.hallen.zender.model.interfaces.OnProgressUpdateListener
 import com.hallen.zender.ui.adapters.PagerAdapter
+import com.hallen.zender.ui.fragments.HistoryFragment
 import com.hallen.zender.utils.Permissions
 import com.hallen.zender.utils.Toas
 import com.hallen.zender.utils.WifiClass
@@ -25,6 +29,7 @@ import com.hallen.zender.utils.receivers.ProgressRecevier
 import com.hallen.zender.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import java.util.Date
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), OnProgressUpdateListener {
@@ -45,6 +50,18 @@ class MainActivity : AppCompatActivity(), OnProgressUpdateListener {
         wifiClass.disconnectGroup {}
         Permissions(this).askStoragePermissions()
         createNotificationChannel()
+        binding.historyAnimation.setOnClickListener {
+            showHistory()
+        }
+    }
+
+    private fun showHistory() {
+        val historyFragment = HistoryFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_container, historyFragment)
+            .addToBackStack(null)
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            .commit()
     }
 
     private fun createNotificationChannel() {
@@ -84,6 +101,7 @@ class MainActivity : AppCompatActivity(), OnProgressUpdateListener {
         val filter = IntentFilter()
         filter.addAction("PROGRESS_BROADCAST")
         filter.addAction("VISIBILITY_BROADCAST")
+        filter.addAction("FILE_TRANSFERRED")
         registerReceiver(progressRecevier, filter)
     }
 
@@ -128,12 +146,35 @@ class MainActivity : AppCompatActivity(), OnProgressUpdateListener {
         }
     }
 
+    override fun fileTransfered(file: File, target: String, send: Boolean) {
+        val history = History(
+            id = 0,
+            date = Date().time,
+            file = file,
+            state = COMPLETED,
+            target = target,
+            send = send
+        )
+        appsViewModels.insertHistory(history)
+    }
+
     override fun onProgressUpdate(progress: Int) {
         binding.progressBar.progress = progress
     }
 
     override fun onSetProgressBarVisibility(visibility: Boolean) {
-        binding.progressBar.visibility = if (visibility) View.VISIBLE else View.GONE
+        binding.progressBar.visibility =
+            when {
+                visibility -> {
+                    binding.historyAnimation.playAnimation()
+                    View.VISIBLE
+                }
+
+                else -> {
+                    binding.historyAnimation.cancelAnimation()
+                    View.GONE
+                }
+            }
     }
 
 }

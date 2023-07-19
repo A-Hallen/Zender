@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.hallen.zender.model.interfaces.OnProgressUpdateListener
+import java.io.File
 
 /**
  * Progress recevier
@@ -23,6 +24,13 @@ class ProgressRecevier : BroadcastReceiver() {
             "VISIBILITY_BROADCAST" -> {
                 val visibility = intent.getBooleanExtra("visibility", false)
                 progressListener?.onSetProgressBarVisibility(visibility)
+            }
+
+            "FILE_TRANSFERRED" -> {
+                val path = intent.getStringExtra("FILE_PATH") ?: ""
+                val target = intent.getStringExtra("TARGET") ?: ""
+                val send = intent.getBooleanExtra("SEND", false)
+                progressListener?.fileTransfered(File(path), target, send)
             }
         }
     }

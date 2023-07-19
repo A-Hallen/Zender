@@ -1,5 +1,6 @@
 package com.hallen.zender.ui.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -14,10 +15,16 @@ import com.hallen.zender.databinding.ArchivosItemBinding
 import com.hallen.zender.model.interfaces.OnItemClickListener
 import com.hallen.zender.ui.adapters.diffs.ArchivosDiffCallback
 import com.hallen.zender.utils.GetMimeFile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class ArchivosAdapter(private val context: Context, private val checkCallback: (Boolean) -> Unit) :
     RecyclerView.Adapter<ArchivosAdapter.ArchivosViewHolder>() {
+    private lateinit var onItemClickListener: OnItemClickListener
+    private val getMimeFile = GetMimeFile(context)
     var items: List<File> = emptyList()
     var checkMode: Boolean = false
         set(value) {
@@ -25,8 +32,16 @@ class ArchivosAdapter(private val context: Context, private val checkCallback: (
             checkCallback(value)
         }
     val checks: MutableLiveData<ArrayList<String>> = MutableLiveData(arrayListOf())
-    private lateinit var onItemClickListener: OnItemClickListener
-    private val getMimeFile = GetMimeFile(context)
+
+    private fun ArrayList<String>?.addValue(item: String) {
+        this?.add(item)
+        checks.value = this
+    }
+
+    private fun ArrayList<String>?.removeValue(item: String) {
+        this?.remove(item)
+        checks.value = this
+    }
 
     fun setItemClickListener(onItemClickListener: OnItemClickListener) {
         this.onItemClickListener = onItemClickListener
@@ -50,7 +65,7 @@ class ArchivosAdapter(private val context: Context, private val checkCallback: (
         val diffResult = DiffUtil.calculateDiff(fileDiffCallback)
         items = it ?: emptyList()
         diffResult.dispatchUpdatesTo(this@ArchivosAdapter)
-        checks.value?.clear()
+        checks.value = arrayListOf()
     }
 
     inner class ArchivosViewHolder(
@@ -64,9 +79,9 @@ class ArchivosAdapter(private val context: Context, private val checkCallback: (
                 if (checkMode) {
                     val checkBox = binding.checkbox
                     if (checkBox.isChecked) {
-                        checks.value?.remove(items[adapterPosition].absolutePath)
+                        checks.value?.removeValue(items[adapterPosition].absolutePath)
                     } else {
-                        checks.value?.add(items[adapterPosition].absolutePath)
+                        checks.value?.addValue(items[adapterPosition].absolutePath)
                     }
                     checkBox.toggle()
                 } else onItemClickListener.onItemClick(adapterPosition)
@@ -75,7 +90,7 @@ class ArchivosAdapter(private val context: Context, private val checkCallback: (
                 binding.checkbox.visibility = View.VISIBLE
                 binding.checkbox.toggle()
                 checkMode = !checkMode
-                checks.value?.add(items[adapterPosition].absolutePath)
+                checks.value?.addValue(items[adapterPosition].absolutePath)
                 notifyDataSetChanged()
                 true
             }
@@ -83,7 +98,8 @@ class ArchivosAdapter(private val context: Context, private val checkCallback: (
 
         fun bind(item: File) {
             val glide = Glide.with(context)
-            val mime = getMimeFile.getmime(item).split("/")[0]
+            val mime = getMimeFile.getmime(item)
+            val mimeSplit = mime.split("/")[0]
             val isDirectory = item.isDirectory
             val sizeValue = if (!isDirectory) getSize(item) else null
             with(binding) {
@@ -92,19 +108,29 @@ class ArchivosAdapter(private val context: Context, private val checkCallback: (
                     text = sizeValue
                     visibility = if (item.isDirectory) View.GONE else View.VISIBLE
                 }
-                when (mime) {
-                    "image", "video" -> {
+                when {
+                    mimeSplit == "image" || mimeSplit == "video" -> {
                         glide.load(item).transition(DrawableTransitionOptions.withCrossFade())
                             .placeholder(R.color.black)
                             .error(android.R.color.black).into(icon)
                     }
-                    else -> {
-                        if (isDirectory) {
-                            glide.load(R.drawable.ic_folder).into(icon)
-                        } else {
-                            val image = getMimeFile.getImageFromExtension()
-                            glide.load(image).error(R.drawable.ic_document).into(icon)
+
+                    mime == "application/vnd.android.package-archive" -> {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val drawable = getMimeFile.getApkIcon(item)
+                            withContext(Dispatchers.Main) {
+                                glide.load(drawable).into(icon)
+                            }
                         }
+                    }
+
+                    isDirectory -> {
+                        glide.load(R.drawable.ic_folder).into(icon)
+                    }
+
+                    else -> {
+                        val image = getMimeFile.getImageFromExtension()
+                        glide.load(image).error(R.drawable.ic_document).into(icon)
                     }
                 }
                 if (checkMode) {
@@ -113,7 +139,6 @@ class ArchivosAdapter(private val context: Context, private val checkCallback: (
                         if (!checkbox.isChecked) checkbox.toggle()
                     } else if (checkbox.isChecked) checkbox.toggle()
                 } else checkbox.visibility = View.INVISIBLE
-
             }
         }
     }
@@ -127,16 +152,21 @@ class ArchivosAdapter(private val context: Context, private val checkCallback: (
             in 1000000L..1000000000L -> {
                 String.format("%.2f", (size / 1000000F)) + "Mb"
             }
+
             in 1000000000L..1000000000000L -> {
                 String.format("%.2f", (size / 1000000000F)) + "Gb"
             }
+
             else -> "0 Bytes"
         }
     }
 
-    fun sellectAll(b: Boolean) {
-        checks.value?.clear()
-        checkMode = b
+    @SuppressLint("NotifyDataSetChanged")
+    fun checkAll(value: Boolean) {
+        checks.value = if (value) {
+            ArrayList(items.map { it.absolutePath })
+        } else arrayListOf()
+        checkMode = value
         notifyDataSetChanged()
     }
 }

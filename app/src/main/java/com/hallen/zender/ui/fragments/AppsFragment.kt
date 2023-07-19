@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -34,30 +35,31 @@ class AppsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         appAdapter = AppAdapter()
+
         val matchParent = CoordinatorLayout.LayoutParams.MATCH_PARENT
         val layoutParams = CoordinatorLayout.LayoutParams(matchParent, matchParent)
+        layoutParams.topMargin = 0
+        val marginLayoutParams = CoordinatorLayout.LayoutParams(matchParent, matchParent)
+        marginLayoutParams.topMargin = binding.allContainer.height
+
+        binding.delete.visibility = View.INVISIBLE
+
         appAdapter.checkeds.observe(viewLifecycleOwner) {
-            if (it.isEmpty()) {
-                with(binding) {
+            with(binding) {
+                bottomView.isVisible = it.isNotEmpty()
+                if (it.isEmpty()) {
                     allContainer.visibility = View.GONE
                     appFab.setImageResource(R.drawable.bottom_fav_bg_search)
-                    // Establecer el valor del atributo como margen inferior para el BottomAppBar
-                    recyclerview.layoutParams =
-                        layoutParams.apply { topMargin = 0 }
+                    recyclerview.layoutParams = layoutParams
                     counter.visibility = View.GONE
                     counter.text = ""
+                    return@with
                 }
-            } else {
-                // Obtener el valor del atributo actionBarSize en píxeles
-                with(binding) {
-                    appFab.setImageResource(R.drawable.bottom_fav_bg)
-                    allContainer.visibility = View.VISIBLE
-                    recyclerview.layoutParams = layoutParams.apply {
-                        topMargin = binding.allContainer.height
-                    }
-                    counter.visibility = View.VISIBLE
-                    counter.text = it.size.toString()
-                }
+                appFab.setImageResource(R.drawable.bottom_fav_bg)
+                allContainer.visibility = View.VISIBLE
+                recyclerview.layoutParams = marginLayoutParams
+                counter.visibility = View.VISIBLE
+                counter.text = it.size.toString()
             }
         }
 
@@ -86,8 +88,10 @@ class AppsFragment : Fragment() {
                 wifiClass.discoverDevices()
             }
         }
+        binding.close.setOnClickListener {
+            if (binding.allCb.isChecked) binding.allCb.toggle()
+            appAdapter.checkAll(false)
+        }
         binding.fastScroll.setUpRecyclerView(binding.recyclerview)
     }
-
-
 }

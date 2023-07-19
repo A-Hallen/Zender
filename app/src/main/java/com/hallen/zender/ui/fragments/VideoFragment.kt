@@ -59,7 +59,7 @@ class VideoFragment : Fragment() {
                     counter.visibility = View.VISIBLE
                     counter.text = it.size.toString()
                 }
-                bottomNavigationView.isVisible = it.isNotEmpty()
+                bottomView.isVisible = it.isNotEmpty()
             }
         }
         binding.recyclerview.layoutManager = LinearLayoutManager(requireContext())
@@ -86,17 +86,13 @@ class VideoFragment : Fragment() {
                 wifiClass.discoverDevices()
             }
         }
-        binding.bottomNavigationView.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.close -> {
-                    videoAdapter.checkAll(false)
-                }
+        binding.close.setOnClickListener {
+            if (binding.allCb.isChecked) binding.allCb.toggle()
 
-                R.id.delete -> {
-                    if (videoAdapter.checks.isNotEmpty()) deleteFile()
-                }
-            }
-            return@setOnItemSelectedListener true
+            videoAdapter.checkAll(false)
+        }
+        binding.delete.setOnClickListener {
+            if (videoAdapter.checks.isNotEmpty()) deleteFile()
         }
         binding.fastScroll.setUpRecyclerView(binding.recyclerview)
     }

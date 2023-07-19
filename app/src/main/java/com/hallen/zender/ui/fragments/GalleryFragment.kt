@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -42,8 +41,7 @@ class GalleryFragment : Fragment() {
                     appFab.setImageResource(R.drawable.bottom_fav_bg_search)
                     allContainer.visibility = View.GONE
                     // Establecer el valor del atributo como margen inferior para el BottomAppBar
-                    recyclerview.layoutParams =
-                        layoutParams.apply { topMargin = 0 }
+                    recyclerview.layoutParams = layoutParams.apply { topMargin = 0 }
                     counter.text = ""
                     counter.visibility = View.GONE
                 }
@@ -87,18 +85,5 @@ class GalleryFragment : Fragment() {
                 wifiClass.discoverDevices()
             }
         }
-        handleBackPressed()
-    }
-
-    private fun handleBackPressed() {
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (galleryAdapter.checks.isEmpty()) {
-                        isEnabled = false
-                    } else galleryAdapter.checkAll(false)
-                }
-            })
     }
 }

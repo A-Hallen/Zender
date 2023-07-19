@@ -14,6 +14,7 @@ import com.hallen.zender.databinding.GalleryItemBinding
 import com.hallen.zender.model.Image
 import com.hallen.zender.ui.adapters.diffs.ImageDiffCallback
 import com.hallen.zender.utils.ActionView
+import java.io.File
 import java.text.SimpleDateFormat
 
 class ImageAdapter :
@@ -121,7 +122,8 @@ class ImageAdapter :
                         } else checks.remove(path)
                         checkeds.value = checks
                     } else {
-                        actionView.showImage(uri, binding.root.context)
+                        actionView.showImage(File(path), binding.root.context)
+                        //actionView.showImage(uri, binding.root.context)
                     }
                 }
                 parent.setOnLongClickListener {

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hallen.zender.MainActivity
 import com.hallen.zender.R
@@ -32,74 +33,78 @@ class AudioFragment : Fragment() {
         return binding.root
     }
 
+    private val checkedsObserver = Observer<ArrayList<String>> {
+        if (it.isEmpty()) {
+            binding.appFab.setImageResource(R.drawable.bottom_fav_bg_search)
+            binding.counter.text = ""
+
+        } else {
+            binding.appFab.setImageResource(R.drawable.bottom_fav_bg)
+            binding.counter.text = it.size.toString()
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupRecyclerView()
+        setupObservers()
+        addListeners()
+    }
 
-        audioAdapter = AudioAdapter()
-        audioAdapter.checkeds.observe(viewLifecycleOwner) {
-            with(binding) {
-                if (it.isEmpty()) {
-                    appFab.setImageResource(R.drawable.bottom_fav_bg_search)
-                    allContainer.visibility = View.GONE
-                    counter.visibility = View.GONE
-                    counter.text = ""
-                } else {
-                    appFab.setImageResource(R.drawable.bottom_fav_bg)
-                    counter.visibility = View.VISIBLE
-                    counter.text = it.size.toString()
-                }
-                bottomNavigationView.isVisible = audioAdapter.checkedMode
+    private fun setupRecyclerView() {
+        with(binding) {
+            audioAdapter = AudioAdapter {
+                close.isVisible = it
+                delete.isVisible = it
+                allContainer.isVisible = it
+                bottomView.isVisible = it
+                counter.isVisible = it
+                if (!it && allCb.isChecked && audioAdapter.checks.isEmpty()) allCb.toggle()
             }
+            recyclerview.layoutManager = LinearLayoutManager(requireContext())
+            fastScroll.setUpRecyclerView(recyclerview)
         }
+    }
 
-        binding.recyclerview.layoutManager = LinearLayoutManager(requireContext())
+    private fun setupObservers() {
+        audioAdapter.checkeds.observe(viewLifecycleOwner, checkedsObserver)
         binding.recyclerview.adapter = audioAdapter
         appsViewModels.audiosLiveData.observe(viewLifecycleOwner) {
             binding.fastScroll.size = it.size
             audioAdapter.updateImages(ArrayList(it))
         }
-        binding.appFab.setOnClickListener {
-            val audios = appsViewModels.audiosLiveData.value
-                ?.mapNotNull { it.takeIf { audioAdapter.checks.contains(it.path) } }
-                ?.map { File(it.path) } ?: emptyList()
+    }
 
-            val mainActivity = (requireActivity() as MainActivity)
-            val wifiClass = mainActivity.wifiClass
-            if (audios.isEmpty()) {
-                wifiClass.discoverDevices(false)
-            } else {
-                mainActivity.files.addAll(audios)
-                wifiClass.discoverDevices()
+    private fun addListeners() {
+        with(binding) {
+            close.setOnClickListener { audioAdapter.checkAll(false) }
+            appFab.setOnClickListener { appFabListener() }
+            allCb.setOnCheckedChangeListener { _, b -> audioAdapter.checkAll(b) }
+            delete.setOnClickListener {
+                if (audioAdapter.checks.isNotEmpty()) deleteFile()
             }
         }
-        binding.bottomNavigationView.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.close -> {
-                    audioAdapter.checkAll(false)
-                }
-
-                R.id.delete -> {
-                    if (audioAdapter.checks.isNotEmpty()) deleteFile()
-                }
-            }
-            return@setOnItemSelectedListener true
-        }
-        binding.fastScroll.setUpRecyclerView(binding.recyclerview)
     }
 
     private fun deleteFile() {
         val checks: List<Pair<String, Uri?>> = audioAdapter.checks.map { path ->
-            Pair(
-                path,
-                audioAdapter.audios.firstOrNull { audio ->
-                    audio.path == path
-                }?.uri
-            )
+            val uri = audioAdapter.audios.firstOrNull { audio ->
+                audio.path == path
+            }?.uri
+            Pair(path, uri)
         }
         actionDelete.deleteFile(checks) {
-            audioAdapter.checks.clear()
-            audioAdapter.checkeds.value = arrayListOf()
+            audioAdapter.checkAll(false)
             appsViewModels.getAllAudios(requireContext())
         }
+    }
+
+    private fun appFabListener() {
+        val audios = appsViewModels.audiosLiveData.value
+            ?.mapNotNull { it.takeIf { audioAdapter.checks.contains(it.path) } }
+            ?.map { File(it.path) } ?: emptyList()
+        val mainActivity = (requireActivity() as MainActivity)
+        mainActivity.wifiClass.discoverDevices(audios.isNotEmpty())
+        mainActivity.files.addAll(audios)
     }
 }

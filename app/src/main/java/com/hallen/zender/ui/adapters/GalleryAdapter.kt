@@ -61,6 +61,8 @@ class GalleryAdapter :
                 .into(binding.icon)
             with(binding) {
                 if (file in checks) {
+                    val checkeds: MutableLiveData<ArrayList<String>> =
+                        MutableLiveData<ArrayList<String>>().apply { value = arrayListOf() }
                     if (!checkbox.isChecked) checkbox.toggle()
                 } else if (checkbox.isChecked) checkbox.toggle()
                 parent.setOnClickListener {

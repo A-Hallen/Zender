@@ -26,16 +26,11 @@ import com.hallen.zender.ui.adapters.DeviceAdapter
 import com.hallen.zender.utils.services.TransferService
 import com.orhanobut.logger.Logger
 import java.net.InetAddress
-import java.net.ServerSocket
-import java.net.Socket
 
 class WifiClass(private val ctx: Context) : ServiceConnection {
     val peers = MutableLiveData<MutableCollection<WifiP2pDevice>>()
     private var isHost: Boolean? = null
     private val mainLooper = ctx.mainLooper
-    private lateinit var serverClass: ServerClass
-    private lateinit var clientClass: ClientClass
-    private var sendReceive: SendReceive? = null
     private val mManager = ctx.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
     private val mChannel = mManager.initialize(ctx, mainLooper, null)
     private val mReceiver = WiFiDirectBroadcastReceiver(mManager, mChannel, ctx as MainActivity)
@@ -45,8 +40,6 @@ class WifiClass(private val ctx: Context) : ServiceConnection {
         addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
         addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
     }
-    private var serverSocket: ServerSocket? = null
-    private var socket: Socket? = null
     private var sending = false
     private var transferService: TransferService? = null
     private var isBound = false
@@ -258,68 +251,39 @@ class WifiClass(private val ctx: Context) : ServiceConnection {
 
 
     // Se define una instancia de ConnectionInfoListener para manejar la conexión con otro dispositivo
+    @SuppressLint("MissingPermission")
     val connectionInfoListener: WifiP2pManager.ConnectionInfoListener =
         WifiP2pManager.ConnectionInfoListener {
             // Se obtiene la dirección del propietario del grupo
             val groupOwnerAddress: InetAddress = it.groupOwnerAddress
             // Se verifica si el dispositivo actual es el host del grupo
             isHost = it.groupFormed && it.isGroupOwner
-            // Se utiliza un bloque when para manejar el comportamiento del dispositivo dependiendo de si es el host o no
-            this.socket?.close()
-            this.serverSocket?.close()
-            when {
-                // Si es el host, se inicia una instancia de ServerClass para esperar conexiones entrantes
-                isHost!! -> {
-                    Logger.i("Este dispositivo sera el HOST: $sending")
-                    val intent = Intent(ctx, TransferService::class.java)
-                    intent.putExtra("HostAdress", "")
-                    startTheService(intent)
-
-//                    serverClass = ServerClass { socket, serverSocket ->
-//                        Logger.i("Obtenemos el socket: $sending")
-//                        this.serverSocket = serverSocket; this.socket = socket
-//                        sendReceive = SendReceive(this, this.socket!!)
-//                        sendReceive!!.start()
-//                        Logger.i("sendReceive iniciado: $sending")
-//                        sendFiles()
-//                    }
-//                    serverClass.start()
-                }
-                // Si no es el host, se inicia una instancia de ClientClass para conectarse al host
-                else -> {
-                    Logger.i("Este dispositivo sera el CLIENT: $sending")
-                    val intent = Intent(ctx, TransferService::class.java)
-                    intent.putExtra("HostAdress", groupOwnerAddress.hostAddress)
-                    startTheService(intent)
-
-
-//                    clientClass = ClientClass(groupOwnerAddress) { socket: Socket ->
-//                        this.socket = socket
-//                        Logger.i("Obtenemos el socket: $sending")
-//                        sendReceive = SendReceive(this, this.socket!!)
-//                        sendReceive!!.start()
-//                        Logger.i("sendReceive iniciado: $sending")
-//                        sendFiles()
-//                    }
-//                    clientClass.start()
-                }
+            val groupAddress = if (isHost!!) "" else groupOwnerAddress.hostAddress
+            mManager.requestGroupInfo(mChannel) { group ->
+                val deviceConnected = if (isHost!!) {
+                    val clients = group.clientList.firstOrNull()
+                    Logger.i("CLIENT LIST: ${group.clientList}")
+                    clients?.deviceName
+                } else group.owner.deviceName
+                Logger.i("HOST?: $isHost")
+                val intent = Intent(ctx, TransferService::class.java)
+                intent.putExtra("DeviceConnected", deviceConnected)
+                intent.putExtra("HostAdress", groupAddress)
+                startTheService(intent)
             }
         }
 
     private fun startTheService(intent: Intent) {
         val pkg: String = ctx.packageName
         val intentService = Intent()
-        intentService.component = ComponentName(
-            pkg, "$pkg.utils.services.TransferService"
-        )
+        intentService.component = ComponentName(pkg, "$pkg.utils.services.TransferService")
         val bind = ctx.bindService(intentService, this, 0)
-        if (!bind) {
-            ctx.bindService(intent, this, 0)
-        } else {
+        if (bind) {
             ctx.startService(intent)
+        } else {
+            ctx.bindService(intent, this, 0)
         }
     }
-
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         Logger.i("SERVICIO $name CONECTADO")

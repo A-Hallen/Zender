@@ -52,10 +52,10 @@ class AppAdapter :
     @SuppressLint("NotifyDataSetChanged")
     fun checkAll(value: Boolean) {
         checkAll = value
+        checks.clear()
         if (checkAll) {
-            checks.clear()
             apps.map { checks.add(it.packageName) }
-        } else checks.clear()
+        }
         checkeds.value = checks
         notifyDataSetChanged()
     }

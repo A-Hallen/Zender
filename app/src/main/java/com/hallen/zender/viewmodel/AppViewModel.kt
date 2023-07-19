@@ -10,7 +10,12 @@ import android.os.storage.StorageManager
 import android.provider.MediaStore
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.hallen.zender.model.*
+import com.hallen.zender.model.Album
+import com.hallen.zender.model.Audio
+import com.hallen.zender.model.History
+import com.hallen.zender.model.Image
+import com.hallen.zender.model.Storage
+import com.hallen.zender.model.Video
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +27,8 @@ import javax.inject.Inject
 class AppViewModel @Inject constructor(
     private val appsUseCase: AppsUseCase,
     private val imageUseCase: ImageUseCase,
-    private val fileUseCase: FileUseCase
+    private val fileUseCase: FileUseCase,
+    private val historyUseCase: HistoryUseCase
 ) : ViewModel() {
     val appModel = MutableLiveData<List<ApplicationInfo>>()
     val imagesLiveData: MutableLiveData<List<String>> = MutableLiveData()
@@ -32,6 +38,29 @@ class AppViewModel @Inject constructor(
     val storageLiveData: MutableLiveData<List<Storage>> = MutableLiveData()
     val fileLiveData: MutableLiveData<List<File>> = MutableLiveData()
     val actualPath: MutableLiveData<String> = MutableLiveData()
+    val historyLiveData: MutableLiveData<List<History>> = MutableLiveData()
+
+
+    fun insertHistory(history: History) {
+        CoroutineScope(Dispatchers.IO).launch {
+            historyUseCase.insertHistory(history)
+            getAllHistory()
+        }
+    }
+
+    fun deleteHistoriesbyId(historiesId: java.util.ArrayList<Long>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            historyUseCase.deleteHistoriesById(historiesId)
+            getAllHistory()
+        }
+    }
+
+    fun getAllHistory() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val histories = historyUseCase.getAllHistory()
+            historyLiveData.postValue(histories)
+        }
+    }
 
     private fun getAllVideosFromDevice(context: Context): List<Video> {
         val uri: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
