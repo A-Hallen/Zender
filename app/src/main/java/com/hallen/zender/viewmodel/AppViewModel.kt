@@ -31,7 +31,6 @@ class AppViewModel @Inject constructor(
     private val historyUseCase: HistoryUseCase
 ) : ViewModel() {
     val appModel = MutableLiveData<List<ApplicationInfo>>()
-    val imagesLiveData: MutableLiveData<List<String>> = MutableLiveData()
     val albumesLiveData: MutableLiveData<List<Image>> = MutableLiveData()
     val videosLiveData: MutableLiveData<List<Video>> = MutableLiveData()
     val audiosLiveData: MutableLiveData<List<Audio>> = MutableLiveData()
@@ -223,19 +222,21 @@ class AppViewModel @Inject constructor(
         }
     }
 
+    private fun loadFilesAsync(path: String) {
+        fileUseCase.getFilesFromFolder(path)?.let {
+            fileLiveData.postValue(it)
+            actualPath.postValue(path)
+        }
+    }
+
 
     fun getAllData(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             val storages = getStorages(context)
             storageLiveData.postValue(storages)
-            CoroutineScope(Dispatchers.Main).launch {
-                loadFiles(storages.firstOrNull()?.path ?: "")
-            }
-        }
-        CoroutineScope(Dispatchers.IO).launch {
+            loadFilesAsync(storages.firstOrNull()?.path ?: "")
             val apps = appsUseCase.getAllApps(context)
             appModel.postValue(apps)
-        }.invokeOnCompletion {
             getAllImages(context)
             getAllVideos(context)
             getAllAudios(context)

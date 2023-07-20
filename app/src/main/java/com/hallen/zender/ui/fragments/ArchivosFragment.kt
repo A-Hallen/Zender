@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hallen.zender.MainActivity
 import com.hallen.zender.R
@@ -54,7 +55,13 @@ class ArchivosFragment : Fragment(), OnItemClickListener {
 
     private fun setupRecyclerViews() {
         with(binding) {
-            storageRecyclerview.layoutManager = GridLayoutManager(requireContext(), 2)
+            val gridLayoutManager = GridLayoutManager(requireContext(), 2)
+            gridLayoutManager.spanSizeLookup = object : SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return if (storageAdapter.items.size == 1) 2 else 1
+                }
+            }
+            storageRecyclerview.layoutManager = gridLayoutManager
             recyclerview.layoutManager = LinearLayoutManager(requireContext())
             storageAdapter.setItemClickListener(storageClickListener)
             storageRecyclerview.adapter = storageAdapter

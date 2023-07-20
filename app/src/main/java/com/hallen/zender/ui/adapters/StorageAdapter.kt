@@ -59,8 +59,18 @@ class StorageAdapter : RecyclerView.Adapter<StorageAdapter.StorageViewHolder>() 
 
         @SuppressLint("SetTextI18n")
         fun bind(item: Storage) {
-            val availableText = formatSize(item.total - item.available)
-            val spannableSize = SpannableString("$availableText /${formatSize(item.total)}")
+            with(binding) {
+                val percent = calcPercent(item.available, item.total)
+                progressBar.progress = percent
+                progressText.text = "$percent%"
+                name.text = item.name
+                size.text = getSizeText(item.available, item.total)
+            }
+        }
+
+        private fun getSizeText(available: Long, total: Long): SpannableString {
+            val availableText = formatSize(total - available)
+            val spannableSize = SpannableString("$availableText /${formatSize(total)}")
             val textColor1 = ContextCompat.getColor(binding.root.context, R.color.colorPrimary)
             val textColor2 = ContextCompat.getColor(binding.root.context, R.color.gray)
             spannableSize.setSpan(
@@ -72,13 +82,7 @@ class StorageAdapter : RecyclerView.Adapter<StorageAdapter.StorageViewHolder>() 
                 availableText.length + 1,
                 spannableSize.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            with(binding) {
-                val percent = calcPercent(item.available, item.total)
-                progressBar.progress = percent
-                progressText.text = "$percent%"
-                name.text = item.name
-                size.text = spannableSize
-            }
+            return spannableSize
         }
 
         private fun formatSize(size: Long): String {
@@ -88,9 +92,11 @@ class StorageAdapter : RecyclerView.Adapter<StorageAdapter.StorageViewHolder>() 
                 in 1000000L..1000000000L -> {
                     String.format("%.2f", (size / 1000000F)) + "Mb"
                 }
+
                 in 1000000000L..1000000000000L -> {
                     String.format("%.2f", (size / 1000000000F)) + "Gb"
                 }
+
                 else -> "0 Bytes"
             }
         }
