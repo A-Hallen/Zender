@@ -48,6 +48,7 @@ class TransferService : Service() {
         .setSmallIcon(R.drawable.ic_send)
         .setContentText("Servicio de transferencia en segundo plano")
         .setOngoing(true)
+        .setOnlyAlertOnce(true)
         .setProgress(100, 0, true)
 
     override fun onCreate() {
